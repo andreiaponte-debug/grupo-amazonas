@@ -512,12 +512,11 @@ function drawGeral(mes){
     options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{position:'left',title:{display:true,text:'Visitas / anúncio'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Contatos / anúncio'}}}}});
 
   if(cCondChart)cCondChart.destroy();
-  cCondChart=new Chart(cCond,{data:{labels:src.cond.map(x=>x.l),datasets:[
+  cCondChart=new Chart(cCond,{data:{labels:src.cond.map(x=>x.l+' ('+fmt(x.a)+' anúncios)'),datasets:[
     {type:'bar',label:'Contatos',data:src.cond.map(x=>x.c),backgroundColor:GY,borderRadius:5,yAxisID:'y'},
-    {type:'line',label:'Taxa de conversão (%)',data:src.cond.map(x=>x.tx),borderColor:GR,backgroundColor:GR,borderWidth:3,pointRadius:5,yAxisID:'y1'},
-    {type:'line',label:'Anúncios ativos',data:src.cond.map(x=>x.a),borderColor:'#888',backgroundColor:'#888',borderDash:[5,4],borderWidth:2,pointRadius:4,yAxisID:'y2'}]},
-    options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?(c.dataset.label==='Anúncios ativos'?c.dataset.label+': '+fmt(c.parsed.y):c.dataset.label+': '+c.parsed.y+'%'):'Contatos: '+fmt(c.parsed.y)}}},
-    scales:{y:{position:'left',title:{display:true,text:'Contatos'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Conversão %'},suggestedMax:3},y2:{display:false}}}});
+    {type:'line',label:'Taxa de conversão (%)',data:src.cond.map(x=>x.tx),borderColor:GR,backgroundColor:GR,borderWidth:3,pointRadius:6,yAxisID:'y1'}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.type==='line'?c.dataset.label+': '+c.parsed.y+'%':'Contatos: '+fmt(c.parsed.y)}}},
+    scales:{y:{position:'left',title:{display:true,text:'Contatos'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Conversão %'},suggestedMax:3}}}});
 
   if(cPrecoChart)cPrecoChart.destroy();
   cPrecoChart=new Chart(cPreco,{type:'bar',data:{labels:src.preco.map(x=>x.l),datasets:[
