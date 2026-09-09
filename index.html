@@ -245,6 +245,13 @@
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <label style="font-size:13px;color:var(--muted);font-weight:600">Selecione a loja:</label>
         <select id="lojaSelect" style="padding:8px 14px;border-radius:20px;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ml-dark);min-width:280px"></select>
+        <label style="font-size:13px;color:var(--muted);font-weight:600;margin-left:6px">Mês:</label>
+        <select id="mesSelect" style="padding:8px 14px;border-radius:20px;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ml-dark)">
+          <option value="all">Trimestre (Jun–Ago)</option>
+          <option value="6">Junho</option>
+          <option value="7">Julho</option>
+          <option value="8">Agosto</option>
+        </select>
         <span style="font-size:11.5px;color:var(--muted)">Nota de qualidade do anúncio não disponível nesta extração (coluna vazia).</span>
       </div>
     </div>
@@ -285,6 +292,41 @@
 </div>
 
 <script>
+const LOJA_MES={'GAC_AMAZONAS':{6:{a:12,v:11978,c:74,w:73,li:1,cpa:6.17,tx:0.62},7:{a:11,v:16610,c:102,w:100,li:2,cpa:9.27,tx:0.61},8:{a:10,v:13201,c:88,w:87,li:0,cpa:8.8,tx:0.67}},
+  'FRANCE_AMAZONAS_MOOCA':{6:{a:14,v:926,c:12,w:11,li:1,cpa:0.86,tx:1.3},7:{a:15,v:627,c:10,w:10,li:0,cpa:0.67,tx:1.59},8:{a:13,v:226,c:2,w:2,li:0,cpa:0.15,tx:0.88}},
+  'JEEP_AMAZONAS_ANALIA_FRANCO_N':{6:{a:18,v:8970,c:79,w:77,li:1,cpa:4.39,tx:0.88},7:{a:17,v:7036,c:80,w:77,li:2,cpa:4.71,tx:1.14},8:{a:24,v:5306,c:94,w:93,li:1,cpa:3.92,tx:1.77}},
+  'GRUPO_AMAZONAS_UTILITARIOS':{8:{a:1,v:1,c:0,w:0,li:0,cpa:0.0,tx:0.0}},
+  'JEEP_AMAZONAS_SANTOS_DUMONT_U':{6:{a:59,v:1806,c:52,w:51,li:1,cpa:0.88,tx:2.88},7:{a:56,v:1136,c:24,w:24,li:0,cpa:0.43,tx:2.11},8:{a:46,v:3105,c:108,w:107,li:1,cpa:2.35,tx:3.48}},
+  'FIAT_AMAZONAS_SUMARÉ_U':{6:{a:108,v:3898,c:91,w:84,li:7,cpa:0.84,tx:2.33},7:{a:104,v:3378,c:86,w:83,li:2,cpa:0.83,tx:2.55},8:{a:102,v:3453,c:116,w:115,li:1,cpa:1.14,tx:3.36}},
+  'PEUGEOT_AMAZONAS_NORTE_NOVOS':{6:{a:49,v:12078,c:158,w:153,li:4,cpa:3.22,tx:1.31},7:{a:40,v:15892,c:203,w:197,li:6,cpa:5.08,tx:1.28},8:{a:48,v:3010,c:70,w:68,li:1,cpa:1.46,tx:2.33}},
+  'FIAT_AMAZONAS_JD. _EUROPA':{6:{a:404,v:7197,c:151,w:149,li:2,cpa:0.37,tx:2.1},7:{a:645,v:7735,c:147,w:145,li:2,cpa:0.23,tx:1.9},8:{a:547,v:10452,c:275,w:275,li:0,cpa:0.5,tx:2.63}},
+  'OMODA_JAECOO_MOOCA_AMAZONAS':{6:{a:42,v:1563,c:9,w:9,li:0,cpa:0.21,tx:0.58},7:{a:23,v:1954,c:18,w:18,li:0,cpa:0.78,tx:0.92},8:{a:21,v:672,c:10,w:10,li:0,cpa:0.48,tx:1.49}},
+  'OMODA_JAECOO_SANTANA_AMAZONAS':{6:{a:51,v:6767,c:86,w:82,li:3,cpa:1.69,tx:1.27},7:{a:37,v:9318,c:114,w:114,li:0,cpa:3.08,tx:1.22},8:{a:63,v:6204,c:109,w:108,li:0,cpa:1.73,tx:1.76}},
+  'FIAT_AMAZONAS_CASA_VERDE N':{6:{a:105,v:5245,c:108,w:108,li:0,cpa:1.03,tx:2.06},7:{a:46,v:5406,c:121,w:120,li:1,cpa:2.63,tx:2.24},8:{a:45,v:3715,c:83,w:83,li:0,cpa:1.84,tx:2.23}},
+  'GRUPO_AMAZONAS_PIRITUBA':{6:{a:97,v:3050,c:45,w:42,li:3,cpa:0.46,tx:1.48},7:{a:118,v:5118,c:95,w:94,li:0,cpa:0.81,tx:1.86},8:{a:126,v:3788,c:138,w:130,li:8,cpa:1.1,tx:3.64}},
+  'FORD_STUDIO_SUMARÉ_N':{6:{a:28,v:7960,c:60,w:57,li:3,cpa:2.14,tx:0.75},7:{a:30,v:16502,c:106,w:106,li:0,cpa:3.53,tx:0.64},8:{a:28,v:12638,c:89,w:89,li:0,cpa:3.18,tx:0.7}},
+  'FIAT_AMAZONAS_NORTE_N':{6:{a:41,v:13424,c:345,w:339,li:6,cpa:8.41,tx:2.57},7:{a:38,v:22591,c:705,w:700,li:4,cpa:18.55,tx:3.12},8:{a:37,v:14944,c:401,w:399,li:1,cpa:10.84,tx:2.68}},
+  'LEAP_AMAZONAS_SANTANA':{6:{a:64,v:6001,c:66,w:66,li:0,cpa:1.03,tx:1.1},7:{a:21,v:7595,c:167,w:166,li:1,cpa:7.95,tx:2.2},8:{a:63,v:6709,c:115,w:113,li:2,cpa:1.83,tx:1.71}},
+  'MULTIMARCAS_NORTE':{6:{a:76,v:2216,c:70,w:70,li:0,cpa:0.92,tx:3.16},7:{a:93,v:3304,c:129,w:127,li:1,cpa:1.39,tx:3.9},8:{a:126,v:4661,c:172,w:170,li:2,cpa:1.37,tx:3.69}},
+  'AMAZONAS FINANCIAMENTOS':{6:{a:1312,v:58843,c:1439,w:1407,li:29,cpa:1.1,tx:2.45},7:{a:1191,v:72183,c:2410,w:2390,li:15,cpa:2.02,tx:3.34},8:{a:1393,v:70575,c:2148,w:2136,li:6,cpa:1.54,tx:3.04}},
+  'JEEP_AMAZONAS_CASA_VERDE':{6:{a:75,v:14623,c:199,w:195,li:4,cpa:2.65,tx:1.36},7:{a:74,v:12819,c:205,w:203,li:1,cpa:2.77,tx:1.6},8:{a:63,v:11913,c:232,w:232,li:0,cpa:3.68,tx:1.95}},
+  'FORD_STUDIO_GUARULHOS':{6:{a:66,v:2151,c:24,w:22,li:2,cpa:0.36,tx:1.12},7:{a:54,v:4973,c:48,w:47,li:1,cpa:0.89,tx:0.97},8:{a:36,v:5866,c:52,w:50,li:2,cpa:1.44,tx:0.89}},
+  'FIAT_AMAZONAS_CASAVERDE_USADOS':{6:{a:145,v:2635,c:57,w:55,li:2,cpa:0.39,tx:2.16},7:{a:153,v:2564,c:74,w:72,li:2,cpa:0.48,tx:2.89},8:{a:153,v:2262,c:66,w:63,li:3,cpa:0.43,tx:2.92}},
+  'FIAT_AMAZONAS_IPIRANGA_U':{6:{a:272,v:4565,c:109,w:103,li:6,cpa:0.4,tx:2.39},7:{a:194,v:5371,c:158,w:156,li:2,cpa:0.81,tx:2.94},8:{a:305,v:5552,c:191,w:184,li:5,cpa:0.63,tx:3.44}},
+  'JEEP_AMAZONAS_SÃO_CAETANO':{6:{a:63,v:9670,c:92,w:90,li:2,cpa:1.46,tx:0.95},7:{a:47,v:14026,c:143,w:142,li:1,cpa:3.04,tx:1.02},8:{a:47,v:15573,c:198,w:197,li:0,cpa:4.21,tx:1.27}},
+  'LEAP_AMAZONAS_ANALIA':{6:{a:57,v:2403,c:11,w:11,li:0,cpa:0.19,tx:0.46},7:{a:11,v:519,c:10,w:10,li:0,cpa:0.91,tx:1.93},8:{a:10,v:1122,c:20,w:20,li:0,cpa:2.0,tx:1.78}},
+  'FIAT_AMAZONAS_EDGAR_FACO':{6:{a:659,v:45968,c:849,w:832,li:17,cpa:1.29,tx:1.85},7:{a:472,v:46812,c:977,w:971,li:6,cpa:2.07,tx:2.09},8:{a:473,v:44399,c:906,w:904,li:1,cpa:1.92,tx:2.04}},
+  'MULTIMARCAS_AMAZONAS_ABC':{6:{a:93,v:2641,c:62,w:54,li:8,cpa:0.67,tx:2.35},7:{a:141,v:4682,c:126,w:126,li:0,cpa:0.89,tx:2.69},8:{a:150,v:5293,c:153,w:151,li:2,cpa:1.02,tx:2.89}},
+  'GRUPO_AMAZONAS_CELSO_GARCIA_N':{6:{a:98,v:6051,c:123,w:121,li:2,cpa:1.26,tx:2.03},7:{a:83,v:7890,c:180,w:179,li:1,cpa:2.17,tx:2.28},8:{a:104,v:8404,c:231,w:231,li:0,cpa:2.22,tx:2.75}},
+  'PSA_CASA_VERDE_AMAZONAS':{6:{a:27,v:9474,c:141,w:132,li:8,cpa:5.22,tx:1.49},7:{a:28,v:12287,c:171,w:169,li:2,cpa:6.11,tx:1.39},8:{a:28,v:12644,c:258,w:254,li:2,cpa:9.21,tx:2.04}},
+  'FIAT_AMAZONAS_SUMARÉ_N':{6:{a:183,v:48430,c:858,w:841,li:17,cpa:4.69,tx:1.77},7:{a:104,v:62528,c:1281,w:1270,li:10,cpa:12.32,tx:2.05},8:{a:98,v:57794,c:1584,w:1573,li:10,cpa:16.16,tx:2.74}},
+  'FIAT.AMAZONAS.TATUAPÉ USADOS':{6:{a:99,v:3202,c:79,w:76,li:3,cpa:0.8,tx:2.47},7:{a:105,v:3359,c:97,w:96,li:1,cpa:0.92,tx:2.89},8:{a:103,v:3915,c:132,w:130,li:1,cpa:1.28,tx:3.37}},
+  'FIAT_AMAZONAS_NORTE_U':{6:{a:311,v:5710,c:136,w:132,li:4,cpa:0.44,tx:2.38},7:{a:294,v:5467,c:128,w:126,li:1,cpa:0.44,tx:2.34},8:{a:257,v:4070,c:126,w:125,li:1,cpa:0.49,tx:3.1}},
+  'OMODA_JAECOO_GUARULHOS':{6:{a:119,v:5358,c:143,w:135,li:8,cpa:1.2,tx:2.67},7:{a:192,v:11061,c:326,w:321,li:5,cpa:1.7,tx:2.95},8:{a:341,v:9887,c:264,w:263,li:0,cpa:0.77,tx:2.67}},
+  'RENAULT_AMAZONAS_SANTOS_DUMONT':{6:{a:89,v:42602,c:578,w:563,li:15,cpa:6.49,tx:1.36},7:{a:51,v:38562,c:462,w:460,li:1,cpa:9.06,tx:1.2},8:{a:98,v:26090,c:415,w:412,li:2,cpa:4.23,tx:1.59}},
+  'FIAT ANALIAFRANCO':{6:{a:78,v:7422,c:150,w:147,li:3,cpa:1.92,tx:2.02},7:{a:88,v:5644,c:103,w:103,li:0,cpa:1.17,tx:1.82},8:{a:109,v:4369,c:95,w:94,li:1,cpa:0.87,tx:2.17}},
+  'FIAT_AMAZONAS_SANTOS_DUMONT':{6:{a:146,v:21955,c:305,w:295,li:10,cpa:2.09,tx:1.39},7:{a:108,v:24195,c:386,w:384,li:2,cpa:3.57,tx:1.6},8:{a:184,v:22537,c:467,w:466,li:1,cpa:2.54,tx:2.07}},
+  'FIAT_AMAZONAS_IPIRANGA_N':{6:{a:95,v:21915,c:576,w:561,li:15,cpa:6.06,tx:2.63},7:{a:54,v:32374,c:660,w:656,li:4,cpa:12.22,tx:2.04},8:{a:139,v:24559,c:520,w:517,li:2,cpa:3.74,tx:2.12}}};
 const D={
   mensal:[{m:'Jun',v:408697,c:7337},{m:'Jul',v:491518,c:10052},{m:'Ago',v:428909,c:9928}],
   canal:[{l:'WhatsApp',v:26956},{l:'Ligações',v:319},{l:'Perguntas',v:42}],
@@ -439,20 +481,35 @@ document.querySelectorAll('.tabbtn').forEach(btn=>{
 
 // ---- Por Loja tab ----
 let lojaChart;
-function renderLojaKpis(nome){
+const MES_NOME={6:'Junho',7:'Julho',8:'Agosto'};
+function dataFor(nome, mes){
+  if(mes==='all'){
+    const row=D.lojas.find(x=>x.l===nome);
+    return {a:row.a,v:row.v,c:row.c,w:row.w,li:row.li,cpa:row.cpa,tx:row.tx};
+  }
+  const md=(LOJA_MES[nome]||{})[mes];
+  return md || {a:0,v:0,c:0,w:0,li:0,cpa:0,tx:0};
+}
+function renderLojaKpis(){
+  const nome=document.getElementById('lojaSelect').value;
+  const mes=document.getElementById('mesSelect').value;
   const row = D.lojas.find(x=>x.l===nome);
+  const d = dataFor(nome, mes);
+  const periodo = mes==='all' ? 'no trimestre' : `em ${MES_NOME[mes]}`;
   const box = document.getElementById('lojaKpis');
   box.innerHTML = `
-    <div class="kpi"><div class="val">${fmt(row.a)}</div><div class="lbl">Anúncios</div></div>
-    <div class="kpi"><div class="val">${fmt(row.v)}</div><div class="lbl">Visitas</div></div>
-    <div class="kpi"><div class="val">${fmt(row.c)}</div><div class="lbl">Contatos</div></div>
-    <div class="kpi"><div class="val">${row.cpa.toFixed(2)}</div><div class="lbl">Contatos / anúncio</div></div>
-    <div class="kpi"><div class="val">${row.tx.toFixed(2)}%</div><div class="lbl">Taxa de contato</div><div class="delta">${row.m.length} marca${row.m.length>1?'s':''}</div></div>`;
+    <div class="kpi"><div class="val">${fmt(d.a)}</div><div class="lbl">Anúncios</div><div class="delta">${periodo}</div></div>
+    <div class="kpi"><div class="val">${fmt(d.v)}</div><div class="lbl">Visitas</div></div>
+    <div class="kpi"><div class="val">${fmt(d.c)}</div><div class="lbl">Contatos</div></div>
+    <div class="kpi"><div class="val">${d.cpa.toFixed(2)}</div><div class="lbl">Contatos / anúncio</div></div>
+    <div class="kpi"><div class="val">${d.tx.toFixed(2)}%</div><div class="lbl">Taxa de contato</div><div class="delta">${row.m.length} marca${row.m.length>1?'s':''}</div></div>`;
   document.getElementById('lojaMarcas').innerHTML = row.m.map(m=>`<span style="display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 11px;margin:2px 4px 2px 0">${m}</span>`).join(' ');
-  drawLojaChart(nome);
+  drawLojaChart(nome, mes);
+  renderLojaTable(mes);
 }
-function drawLojaChart(selected){
-  const top15=[...D.lojas].sort((a,b)=>b.c-a.c).slice(0,15);
+function drawLojaChart(selected, mes){
+  const withVals=D.lojas.map(x=>({l:x.l, c: mes==='all' ? x.c : dataFor(x.l, mes).c}));
+  const top15=[...withVals].sort((a,b)=>b.c-a.c).slice(0,15);
   const labels=top15.map(x=>x.l.length>22?x.l.slice(0,22)+'…':x.l);
   const colors=top15.map(x=>x.l===selected?'#FFCC00':BL);
   if(lojaChart) lojaChart.destroy();
@@ -460,15 +517,21 @@ function drawLojaChart(selected){
     options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},
       tooltip:{callbacks:{label:c=>fmt(c.parsed.x)+' contatos'}}}}});
 }
-function initLojaTab(){
-  const sel=document.getElementById('lojaSelect');
-  const sorted=[...D.lojas].sort((a,b)=>b.c-a.c);
-  sel.innerHTML=sorted.map(x=>`<option value="${x.l}">${x.l} (${fmt(x.c)} contatos)</option>`).join('');
-  sel.onchange=()=>renderLojaKpis(sel.value);
-  renderLojaKpis(sorted[0].l);
+function renderLojaTable(mes){
+  const rows=D.lojas.map(x=>({l:x.l, d: dataFor(x.l, mes)}));
+  rows.sort((a,b)=>b.d.c-a.d.c);
   const tbl=document.querySelector('#tblLoja tbody');
   tbl.innerHTML='';
-  sorted.forEach(r=>{tbl.innerHTML+=`<tr><td>${r.l}</td><td>${fmt(r.a)}</td><td>${fmt(r.v)}</td><td>${fmt(r.c)}</td><td>${r.cpa.toFixed(2)}</td><td>${r.tx.toFixed(2)}%</td></tr>`;});
+  rows.forEach(r=>{tbl.innerHTML+=`<tr><td>${r.l}</td><td>${fmt(r.d.a)}</td><td>${fmt(r.d.v)}</td><td>${fmt(r.d.c)}</td><td>${r.d.cpa.toFixed(2)}</td><td>${r.d.tx.toFixed(2)}%</td></tr>`;});
+}
+function initLojaTab(){
+  const sel=document.getElementById('lojaSelect');
+  const mesSel=document.getElementById('mesSelect');
+  const sorted=[...D.lojas].sort((a,b)=>b.c-a.c);
+  sel.innerHTML=sorted.map(x=>`<option value="${x.l}">${x.l} (${fmt(x.c)} contatos)</option>`).join('');
+  sel.onchange=renderLojaKpis;
+  mesSel.onchange=renderLojaKpis;
+  renderLojaKpis();
 }
 </script>
 </body>
