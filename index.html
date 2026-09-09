@@ -66,6 +66,9 @@
   tbody tr:hover{background:#fafbff}
   .foot{margin-top:34px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);padding-top:18px}
   @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2,.grid3,.insights{grid-template-columns:1fr}}
+  .tabnav{display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .tabbtn{border:none;background:none;padding:10px 4px;margin-right:18px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+  .tabbtn.active{color:var(--ml-dark);border-bottom-color:var(--ml-yellow)}
 </style>
 </head>
 <body>
@@ -80,6 +83,12 @@
 
 <div class="wrap">
 
+  <div class="tabnav">
+    <button class="tabbtn active" data-tab="geral">Visão Geral</button>
+    <button class="tabbtn" data-tab="loja">Por Loja</button>
+  </div>
+
+  <div id="tab-geral">
   <h2>Visão geral do trimestre</h2>
   <div class="kpis">
     <div class="kpi"><div class="val">1,33 mi</div><div class="lbl">Visitas aos anúncios</div><div class="delta">≈ 14,4 mil/dia</div></div>
@@ -228,6 +237,50 @@
     </table>
   </div>
 
+  </div><!-- /tab-geral -->
+
+  <div id="tab-loja" style="display:none">
+    <h2>Resultado por loja</h2>
+    <div class="panel" style="margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="font-size:13px;color:var(--muted);font-weight:600">Selecione a loja:</label>
+        <select id="lojaSelect" style="padding:8px 14px;border-radius:20px;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ml-dark);min-width:280px"></select>
+        <span style="font-size:11.5px;color:var(--muted)">Nota de qualidade do anúncio não disponível nesta extração (coluna vazia).</span>
+      </div>
+    </div>
+
+    <div class="kpis" id="lojaKpis" style="margin-bottom:18px"></div>
+
+    <div class="grid2">
+      <div class="panel">
+        <h3>Top 15 lojas por contatos</h3>
+        <div class="desc">A loja selecionada aparece destacada em amarelo.</div>
+        <div class="chart-box tall"><canvas id="cLoja"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>Marcas atendidas pela loja</h3>
+        <div class="desc">Marcas comercializadas nessa loja/concessionária.</div>
+        <div id="lojaMarcas" style="max-height:340px;overflow:auto;font-size:13px;line-height:2"></div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:28px">Insights por loja</h2>
+    <div class="insights">
+      <div class="ins"><div class="h">🏆 Top 3 concentram quase metade dos contatos</div><div class="t">AMAZONAS FINANCIAMENTOS, FIAT_AMAZONAS_SUMARÉ_N e FIAT_AMAZONAS_EDGAR_FACO somam <b>12.452 contatos</b> — <b>45,6%</b> do total do grupo.</div></div>
+      <div class="ins"><div class="h">⚡ Eficiência recorde em loja pequena</div><div class="t">FIAT_AMAZONAS_NORTE_N gera <b>33,74 contatos por anúncio</b> com apenas 43 anúncios — a maior eficiência entre as lojas com volume relevante.</div></div>
+      <div class="ins"><div class="h">🚀 Melhor taxa de contato</div><div class="t">MULTIMARCAS_NORTE converte <b>3,64%</b> das visitas em contato — acima da conversão média do grupo (2,06%).</div></div>
+      <div class="ins"><div class="h">🔍 Oportunidade: visitas sem conversão</div><div class="t">GAC_AMAZONAS (0,63%) e FORD_STUDIO_GUARULHOS (0,95%) têm bom volume de visitas mas taxa de contato baixa — espaço para melhorar o anúncio ou o atendimento.</div></div>
+    </div>
+
+    <h2 style="margin-top:28px">Ranking completo — todas as lojas</h2>
+    <div class="panel">
+      <table id="tblLoja">
+        <thead><tr><th>Loja</th><th>Anúncios</th><th>Visitas</th><th>Contatos</th><th>Contatos/anúncio</th><th>Taxa de contato</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div><!-- /tab-loja -->
+
   <div class="foot">Fonte: dados de performance de anúncios · Mercado Livre Veículos (MLB) · Período: Jun–Ago 2026 · Concessionárias do Grupo Amazonas.</div>
 </div>
 
@@ -242,7 +295,44 @@ const D={
   cond:[{l:'Novos (0 km)',tx:1.89,v:1086114,c:20543},{l:'Usados',tx:2.79,v:243010,c:6774}],
   preco:[
     {l:'<R$50k',est:4.7,ct:3.7},{l:'R$50–100k',est:36.9,ct:45.5},{l:'R$100–150k',est:37.4,ct:38.5},
-    {l:'R$150–200k',est:13.4,ct:8.6},{l:'R$200–300k',est:7.0,ct:3.0},{l:'R$300k+',est:0.5,ct:0.7}]
+    {l:'R$150–200k',est:13.4,ct:8.6},{l:'R$200–300k',est:7.0,ct:3.0},{l:'R$300k+',est:0.5,ct:0.7}],
+  lojas:[
+  {l:'AMAZONAS FINANCIAMENTOS',a:2849,v:201601,c:5997,w:5933,li:50,cpa:2.1,tx:2.97,m:['Audi','BMW','BYD','Caoa Chery','Chevrolet','Citroën','Dodge','Fiat','Ford','GAC','Geely','Gwm','Honda','Hyundai','Jac','Jaecoo','Jaguar','Jeep','Kia','Land Rover','Leapmotor','Mercedes-Benz','Mini','Mitsubishi','Nissan','Omoda','Peugeot','Ram','Renault','Smart','Subaru','Suzuki','Toyota','Troller','Volkswagen','Volvo']},
+  {l:'FIAT_AMAZONAS_SUMARÉ_N',a:183,v:168752,c:3723,w:3684,li:37,cpa:20.34,tx:2.21,m:['Fiat']},
+  {l:'FIAT_AMAZONAS_EDGAR_FACO',a:1301,v:137179,c:2732,w:2707,li:24,cpa:2.1,tx:1.99,m:['Citroën','Fiat','Ford','GAC','Geely','Jaecoo','Jeep','Leapmotor','Omoda','Peugeot','Renault']},
+  {l:'FIAT_AMAZONAS_IPIRANGA_N',a:186,v:78848,c:1756,w:1734,li:21,cpa:9.44,tx:2.23,m:['Fiat']},
+  {l:'RENAULT_AMAZONAS_SANTOS_DUMONT',a:156,v:107254,c:1455,w:1435,li:18,cpa:9.33,tx:1.36,m:['Renault']},
+  {l:'FIAT_AMAZONAS_NORTE_N',a:43,v:50959,c:1451,w:1438,li:11,cpa:33.74,tx:2.85,m:['Fiat']},
+  {l:'FIAT_AMAZONAS_SANTOS_DUMONT',a:311,v:68687,c:1158,w:1145,li:13,cpa:3.72,tx:1.69,m:['Fiat']},
+  {l:'OMODA_JAECOO_GUARULHOS',a:542,v:26306,c:733,w:719,li:13,cpa:1.35,tx:2.79,m:['Audi','BMW','BYD','Caoa Chery','Chevrolet','Citroën','Dodge','Fiat','Ford','GAC','Honda','Hyundai','Jaecoo','Jeep','Mercedes-Benz','Mitsubishi','Nissan','Omoda','Peugeot','Renault','Toyota','Volkswagen']},
+  {l:'JEEP_AMAZONAS_CASA_VERDE',a:90,v:39355,c:636,w:630,li:5,cpa:7.07,tx:1.62,m:['Jeep']},
+  {l:'FIAT_AMAZONAS_JD. _EUROPA',a:1202,v:25384,c:573,w:569,li:4,cpa:0.48,tx:2.26,m:['Audi','BYD','Caoa Chery','Chevrolet','Citroën','Fiat','Ford','Honda','Hyundai','Jaecoo','Jeep','Kia','Lexus','Mercedes-Benz','Nissan','Renault','Toyota','Volkswagen']},
+  {l:'PSA_CASA_VERDE_AMAZONAS',a:32,v:34405,c:570,w:555,li:12,cpa:17.81,tx:1.66,m:['Citroën','Peugeot']},
+  {l:'GRUPO_AMAZONAS_CELSO_GARCIA_N',a:171,v:22345,c:534,w:531,li:3,cpa:3.12,tx:2.39,m:['Fiat','Ford','GAC','Geely','Jaecoo','Jeep','Leapmotor','Omoda','Renault']},
+  {l:'FIAT_AMAZONAS_IPIRANGA_U',a:666,v:15488,c:458,w:443,li:13,cpa:0.69,tx:2.96,m:['Audi','BMW','BYD','Caoa Chery','Chevrolet','Citroën','Dodge','Fiat','Ford','Geely','Honda','Hyundai','Jaecoo','Jaguar','Jeep','Land Rover','Mercedes-Benz','Mitsubishi','Nissan','Omoda','Peugeot','Ram','Renault','Subaru','Suzuki','Toyota','Volkswagen']},
+  {l:'JEEP_AMAZONAS_SÃO_CAETANO',a:63,v:39269,c:433,w:429,li:3,cpa:6.87,tx:1.1,m:['Jeep']},
+  {l:'PEUGEOT_AMAZONAS_NORTE_NOVOS',a:61,v:30980,c:431,w:418,li:11,cpa:7.07,tx:1.39,m:['Citroën','Geely','Peugeot']},
+  {l:'FIAT_AMAZONAS_NORTE_U',a:699,v:15247,c:390,w:383,li:6,cpa:0.56,tx:2.56,m:['Audi','BMW','BYD','Caoa Chery','Chevrolet','Citroën','Fiat','Ford','Honda','Hyundai','Jac','Jaecoo','Jaguar','Jeep','Land Rover','Mercedes-Benz','Mitsubishi','Nissan','Peugeot','Ram','Renault','Smart','Toyota','Volkswagen']},
+  {l:'MULTIMARCAS_NORTE',a:217,v:10181,c:371,w:367,li:3,cpa:1.71,tx:3.64,m:['BYD','Caoa Chery','Chevrolet','Citroën','Fiat','Ford','GAC','Geely','Honda','Hyundai','Jeep','Mitsubishi','Nissan','Peugeot','Renault','Toyota','Volkswagen']},
+  {l:'LEAP_AMAZONAS_SANTANA',a:106,v:20305,c:348,w:345,li:3,cpa:3.28,tx:1.71,m:['Leapmotor']},
+  {l:'FIAT ANALIAFRANCO',a:179,v:17435,c:348,w:344,li:4,cpa:1.94,tx:2.0,m:['Fiat']},
+  {l:'MULTIMARCAS_AMAZONAS_ABC',a:263,v:12616,c:341,w:331,li:10,cpa:1.3,tx:2.7,m:['BMW','Caoa Chery','Chevrolet','Citroën','Fiat','Ford','Geely','Gwm','Honda','Hyundai','Jeep','Kia','Leapmotor','Nissan','Peugeot','Renault','Toyota','Volkswagen']},
+  {l:'FIAT_AMAZONAS_CASA_VERDE N',a:106,v:14366,c:312,w:311,li:1,cpa:2.94,tx:2.17,m:['Fiat']},
+  {l:'OMODA_JAECOO_SANTANA_AMAZONAS',a:83,v:22289,c:309,w:304,li:3,cpa:3.72,tx:1.39,m:['Jaecoo','Omoda']},
+  {l:'FIAT.AMAZONAS.TATUAPÉ USADOS',a:235,v:10476,c:308,w:302,li:5,cpa:1.31,tx:2.94,m:['BYD','Caoa Chery','Chevrolet','Citroën','Fiat','Ford','GAC','Honda','Hyundai','Jeep','Mitsubishi','Nissan','Omoda','Peugeot','Ram','Renault','Toyota','Volkswagen']},
+  {l:'FIAT_AMAZONAS_SUMARÉ_U',a:212,v:10729,c:293,w:282,li:10,cpa:1.38,tx:2.73,m:['Audi','BYD','Caoa Chery','Chevrolet','Citroën','Fiat','Ford','Honda','Hyundai','Jaecoo','Jeep','Kia','Mini','Mitsubishi','Nissan','Peugeot','Ram','Renault','Toyota','Troller','Volkswagen','Volvo']},
+  {l:'GRUPO_AMAZONAS_PIRITUBA',a:244,v:11956,c:278,w:266,li:11,cpa:1.14,tx:2.33,m:['Caoa Chery','Chevrolet','Citroën','Fiat','Ford','Honda','Hyundai','Jac','Jeep','Kia','Mitsubishi','Nissan','Renault','Suzuki','Toyota','Volkswagen']},
+  {l:'GAC_AMAZONAS',a:12,v:41789,c:264,w:260,li:3,cpa:22.0,tx:0.63,m:['GAC']},
+  {l:'FORD_STUDIO_SUMARÉ_N',a:37,v:37100,c:255,w:252,li:3,cpa:6.89,tx:0.69,m:['Ford']},
+  {l:'JEEP_AMAZONAS_ANALIA_FRANCO_N',a:29,v:21312,c:253,w:247,li:4,cpa:8.72,tx:1.19,m:['Jeep']},
+  {l:'FIAT_AMAZONAS_CASAVERDE_USADOS',a:349,v:7461,c:197,w:190,li:7,cpa:0.56,tx:2.64,m:['Audi','BYD','Caoa Chery','Chevrolet','Citroën','Dodge','Fiat','Ford','Honda','Hyundai','Jac','Jaecoo','Jeep','Mitsubishi','Nissan','Peugeot','Renault','Toyota','Volkswagen']},
+  {l:'JEEP_AMAZONAS_SANTOS_DUMONT_U',a:121,v:6047,c:184,w:182,li:2,cpa:1.52,tx:3.04,m:['Audi','BMW','BYD','Chevrolet','Citroën','Fiat','Ford','GAC','Honda','Hyundai','Jaecoo','Jeep','Land Rover','Mercedes-Benz','Mitsubishi','Nissan','Peugeot','Renault','Subaru','Suzuki','Toyota','Volkswagen','Volvo']},
+  {l:'FORD_STUDIO_GUARULHOS',a:105,v:12990,c:124,w:119,li:5,cpa:1.18,tx:0.95,m:['Fiat','Ford','Honda','Hyundai','Mitsubishi','Nissan','Smart','Toyota','Volkswagen']},
+  {l:'LEAP_AMAZONAS_ANALIA',a:57,v:4044,c:41,w:41,li:0,cpa:0.72,tx:1.01,m:['Leapmotor']},
+  {l:'OMODA_JAECOO_MOOCA_AMAZONAS',a:54,v:4189,c:37,w:37,li:0,cpa:0.69,tx:0.88,m:['Jaecoo','Omoda']},
+  {l:'FRANCE_AMAZONAS_MOOCA',a:16,v:1779,c:24,w:23,li:1,cpa:1.5,tx:1.35,m:['Renault']},
+  {l:'GRUPO_AMAZONAS_UTILITARIOS',a:1,v:1,c:0,w:0,li:0,cpa:0.0,tx:0.0,m:['Peugeot']}
+  ]
 };
 const BL='#3483FA',DK='#2D3277',YL='#FFCC00',GR='#00A650',GY='#c9cede';
 const fmt=n=>n.toLocaleString('pt-BR');
@@ -334,6 +424,52 @@ new Chart(cBench,{data:{labels:['0 km','Geral Amazonas','Usados'],datasets:[
 
 const tb=document.querySelector('#tbl tbody');
 D.marcaFull.forEach(r=>{tb.innerHTML+=`<tr><td>${r.l}</td><td>${fmt(r.a)}</td><td>${fmt(r.v)}</td><td>${fmt(r.c)}</td><td>${(r.c/r.a).toFixed(2)}</td></tr>`;});
+
+// ---- tab navigation ----
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab=btn.dataset.tab;
+    document.getElementById('tab-geral').style.display = tab==='geral' ? '' : 'none';
+    document.getElementById('tab-loja').style.display = tab==='loja' ? '' : 'none';
+    if(tab==='loja' && !window._lojaInit){ initLojaTab(); window._lojaInit=true; }
+  };
+});
+
+// ---- Por Loja tab ----
+let lojaChart;
+function renderLojaKpis(nome){
+  const row = D.lojas.find(x=>x.l===nome);
+  const box = document.getElementById('lojaKpis');
+  box.innerHTML = `
+    <div class="kpi"><div class="val">${fmt(row.a)}</div><div class="lbl">Anúncios</div></div>
+    <div class="kpi"><div class="val">${fmt(row.v)}</div><div class="lbl">Visitas</div></div>
+    <div class="kpi"><div class="val">${fmt(row.c)}</div><div class="lbl">Contatos</div></div>
+    <div class="kpi"><div class="val">${row.cpa.toFixed(2)}</div><div class="lbl">Contatos / anúncio</div></div>
+    <div class="kpi"><div class="val">${row.tx.toFixed(2)}%</div><div class="lbl">Taxa de contato</div><div class="delta">${row.m.length} marca${row.m.length>1?'s':''}</div></div>`;
+  document.getElementById('lojaMarcas').innerHTML = row.m.map(m=>`<span style="display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 11px;margin:2px 4px 2px 0">${m}</span>`).join(' ');
+  drawLojaChart(nome);
+}
+function drawLojaChart(selected){
+  const top15=[...D.lojas].sort((a,b)=>b.c-a.c).slice(0,15);
+  const labels=top15.map(x=>x.l.length>22?x.l.slice(0,22)+'…':x.l);
+  const colors=top15.map(x=>x.l===selected?'#FFCC00':BL);
+  if(lojaChart) lojaChart.destroy();
+  lojaChart=new Chart(cLoja,{type:'bar',data:{labels,datasets:[{label:'Contatos',data:top15.map(x=>x.c),backgroundColor:colors,borderRadius:5}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>fmt(c.parsed.x)+' contatos'}}}}});
+}
+function initLojaTab(){
+  const sel=document.getElementById('lojaSelect');
+  const sorted=[...D.lojas].sort((a,b)=>b.c-a.c);
+  sel.innerHTML=sorted.map(x=>`<option value="${x.l}">${x.l} (${fmt(x.c)} contatos)</option>`).join('');
+  sel.onchange=()=>renderLojaKpis(sel.value);
+  renderLojaKpis(sorted[0].l);
+  const tbl=document.querySelector('#tblLoja tbody');
+  tbl.innerHTML='';
+  sorted.forEach(r=>{tbl.innerHTML+=`<tr><td>${r.l}</td><td>${fmt(r.a)}</td><td>${fmt(r.v)}</td><td>${fmt(r.c)}</td><td>${r.cpa.toFixed(2)}</td><td>${r.tx.toFixed(2)}%</td></tr>`;});
+}
 </script>
 </body>
 </html>
