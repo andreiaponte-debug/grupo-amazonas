@@ -324,6 +324,12 @@
           <option value="v">Mais visitas (buscas)</option>
           <option value="p">Maior preço</option>
         </select>
+        <label style="font-size:13px;color:var(--muted);font-weight:600">Condição:</label>
+        <select id="veicCond" style="padding:8px 14px;border-radius:20px;border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ml-dark)">
+          <option value="all">Todos</option>
+          <option value="novo">0 km (novo)</option>
+          <option value="usado">Usado</option>
+        </select>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap">
         <div id="veicCount" style="font-size:12px;color:var(--muted)"></div>
@@ -573,11 +579,15 @@ function initEstoqueTab(){
   const busca=document.getElementById('veicBusca');
   const mesSel=document.getElementById('veicMes');
   const ordemSel=document.getElementById('veicOrdem');
+  const condSel=document.getElementById('veicCond');
   function render(){
     const q=busca.value.trim().toLowerCase();
     const mes=mesSel.value;
     const ordem=ordemSel.value;
+    const cond=condSel.value;
     let rows=VEICULOS;
+    if(cond==='novo') rows=rows.filter(it=>it[4]===0);
+    else if(cond==='usado') rows=rows.filter(it=>it[4]!==0);
     if(q){
       rows=rows.filter(it=>{
         const marca=VEIC_MARCAS[it[0]].toLowerCase();
@@ -613,6 +623,7 @@ function initEstoqueTab(){
   busca.addEventListener('input', render);
   mesSel.addEventListener('change', render);
   ordemSel.addEventListener('change', render);
+  condSel.addEventListener('change', render);
   document.getElementById('btnDownloadVeic').onclick=()=>downloadTableCSV('tblVeic','estoque_grupo_amazonas.csv');
   render();
 }
