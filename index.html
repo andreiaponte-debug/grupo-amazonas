@@ -631,6 +631,16 @@ function initEstoqueTab(){
 let lojaChart;
 const MES_NOME={6:'Junho',7:'Julho',8:'Agosto'};
 function dataFor(nome, mes){
+  if(nome==='__ALL__'){
+    if(mes==='all'){
+      const a=D.lojas.reduce((s,x)=>s+x.a,0), v=D.lojas.reduce((s,x)=>s+x.v,0), c=D.lojas.reduce((s,x)=>s+x.c,0);
+      const w=D.lojas.reduce((s,x)=>s+x.w,0), li=D.lojas.reduce((s,x)=>s+x.li,0);
+      return {a,v,c,w,li,cpa:a?Math.round(c/a*100)/100:0,tx:v?Math.round(c/v*10000)/100:0};
+    }
+    let a=0,v=0,c=0,w=0,li=0;
+    D.lojas.forEach(x=>{const md=(LOJA_MES[x.l]||{})[mes]; if(md){a+=md.a;v+=md.v;c+=md.c;w+=md.w;li+=md.li;}});
+    return {a,v,c,w,li,cpa:a?Math.round(c/a*100)/100:0,tx:v?Math.round(c/v*10000)/100:0};
+  }
   if(mes==='all'){
     const row=D.lojas.find(x=>x.l===nome);
     return {a:row.a,v:row.v,c:row.c,w:row.w,li:row.li,cpa:row.cpa,tx:row.tx};
@@ -641,7 +651,8 @@ function dataFor(nome, mes){
 function renderLojaKpis(){
   const nome=document.getElementById('lojaSelect').value;
   const mes=document.getElementById('mesSelect').value;
-  const row = D.lojas.find(x=>x.l===nome);
+  const isAll = nome==='__ALL__';
+  const marcas = isAll ? [...new Set(D.lojas.flatMap(x=>x.m))].sort() : (D.lojas.find(x=>x.l===nome)||{m:[]}).m;
   const d = dataFor(nome, mes);
   const periodo = mes==='all' ? 'no trimestre' : `em ${MES_NOME[mes]}`;
   const box = document.getElementById('lojaKpis');
@@ -650,8 +661,8 @@ function renderLojaKpis(){
     <div class="kpi"><div class="val">${fmt(d.v)}</div><div class="lbl">Visitas</div></div>
     <div class="kpi"><div class="val">${fmt(d.c)}</div><div class="lbl">Contatos</div></div>
     <div class="kpi"><div class="val">${d.cpa.toFixed(2)}</div><div class="lbl">Contatos / anúncio</div></div>
-    <div class="kpi"><div class="val">${d.tx.toFixed(2)}%</div><div class="lbl">Taxa de contato</div><div class="delta">${row.m.length} marca${row.m.length>1?'s':''}</div></div>`;
-  document.getElementById('lojaMarcas').innerHTML = row.m.map(m=>`<span style="display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 11px;margin:2px 4px 2px 0">${m}</span>`).join(' ');
+    <div class="kpi"><div class="val">${d.tx.toFixed(2)}%</div><div class="lbl">Taxa de contato</div><div class="delta">${isAll ? D.lojas.length+' lojas · ' : ''}${marcas.length} marca${marcas.length>1?'s':''}</div></div>`;
+  document.getElementById('lojaMarcas').innerHTML = marcas.map(m=>`<span style="display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:3px 11px;margin:2px 4px 2px 0">${m}</span>`).join(' ');
   drawLojaChart(nome, mes);
   renderLojaTable(mes);
 }
@@ -693,7 +704,9 @@ function initLojaTab(){
   const sel=document.getElementById('lojaSelect');
   const mesSel=document.getElementById('mesSelect');
   const sorted=[...D.lojas].sort((a,b)=>b.c-a.c);
-  sel.innerHTML=sorted.map(x=>`<option value="${x.l}">${x.l} (${fmt(x.c)} contatos)</option>`).join('');
+  const totalContatos=D.lojas.reduce((s,x)=>s+x.c,0);
+  const allOption=`<option value="__ALL__">Todas as lojas (${fmt(totalContatos)} contatos)</option>`;
+  sel.innerHTML=allOption+sorted.map(x=>`<option value="${x.l}">${x.l} (${fmt(x.c)} contatos)</option>`).join('');
   sel.onchange=renderLojaKpis;
   mesSel.onchange=renderLojaKpis;
   document.getElementById('btnDownloadLojas').onclick=()=>downloadTableCSV('tblLoja','ranking_lojas_grupo_amazonas.csv');
