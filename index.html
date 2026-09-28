@@ -284,7 +284,7 @@
     </h2>
     <div class="panel">
       <table id="tblLoja">
-        <thead><tr><th>Loja</th><th>Anúncios</th><th>Visitas</th><th>Contatos</th><th>Logados</th><th>Contatos/anúncio</th><th>Taxa de contato</th></tr></thead>
+        <thead><tr><th>Loja</th><th>Anúncios</th><th>Visitas</th><th>Contatos</th><th>Contatos/anúncio</th><th>Taxa de contato</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -601,8 +601,7 @@ function renderLojaTable(mes){
   rows.sort((a,b)=>b.d.c-a.d.c);
   const tbl=document.querySelector('#tblLoja tbody');
   tbl.innerHTML='';
-  rows.forEach(r=>{const lgTd=r.d.hasLogin?fmt(r.d.lg):'—';
-    tbl.innerHTML+=`<tr><td>${r.l}</td><td>${fmt(r.d.a)}</td><td>${fmt(r.d.v)}</td><td>${fmt(r.d.c)}</td><td>${lgTd}</td><td>${r.d.cpa.toFixed(2)}</td><td>${r.d.tx.toFixed(2)}%</td></tr>`;});
+  rows.forEach(r=>{tbl.innerHTML+=`<tr><td>${r.l}</td><td>${fmt(r.d.a)}</td><td>${fmt(r.d.v)}</td><td>${fmt(r.d.c)}</td><td>${r.d.cpa.toFixed(2)}</td><td>${r.d.tx.toFixed(2)}%</td></tr>`;});
 }
 function downloadTableCSV(tableId, filename){
   const table=document.getElementById(tableId);
